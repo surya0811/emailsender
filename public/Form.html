@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Send Email</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' media='screen' href='style.css'>
+    <!--<script src='main.js'></script>-->
+</head>
+
+<body>
+    <div class="card">
+        <div class="welcome">
+            <h3>Welcome to email sender</h3>
+        </div>
+        <form action="/sendemail" method="POST" enctype="multipart/form-data">
+            <label for="name">Name</label>
+            <input type="text" name="persons_name" id="name" placeholder="Your full name here.." />
+            <br />
+            <label for="email">Email</label>
+            <input type="email" name="persons_email" id="email" placeholder="Please insert your email here.." />
+            <br />
+            <label for="sub">Subject</label>
+            <input type="text" name="persons_subject" id="sub" placeholder="Subject" />
+            <br />
+            <div class="text-area-container">
+                <label for="message">Message</label>
+                <textarea rows="5" cols="18" name="persons_message" id="message" class="scrollable-textarea" placeholder="Message here"></textarea>
+                <!-- <div class="upload-bar">
+                    <span class="upload-icon" title="Upload PDF" onclick="insertText('PDF')">📄</span>
+                    <span class="upload-icon" title="Upload Image" onclick="insertText('Image')">🖼️</span>
+                    <span class="upload-icon" title="Insert URL" onclick="insertText('URL')">🔗</span>
+                </div> -->
+            </div>
+            <div class="file-upload-container">
+                <label for="fileUpload">Upload Image or PDF:</label>
+                <input type="file" name="persons_fileUpload" id="fileUpload" accept=".pdf, image/*">
+            </div>
+            <div class="butn">
+                <button type="submit" name="persons_send" value="Send" >Send</button>
+                &nbsp;&nbsp;&nbsp;&nbsp;
+                <button type="reset" onclick="resetForm()" value="reset" >reset</button>
+            </div>
+            <br />
+            <input type="hidden" name="dateandtime" value="" />
+        </form>
+    </div>
+    <!-- <div classname="thankyoumessage" >
+        <h3> Your mail has been sent successfully.</h3>
+    </div> -->
+    
+    <script>
+        function hello(){
+            var email = document.getElementById('email').value;
+            console.log(email);
+            var pattern = /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/;
+            if(!pattern.match(email)){
+                alert("Email Pattern does not match");
+            }else if((document.getElementById('sub').value && 
+                    document.getElementById('message').value)==null){
+                        alert("Subject and message cannot be blank");
+            }else{
+                
+            alert("Email sent successfully!");
+            // document.getElementById('name').value = '';
+            // document.getElementById('email').value = '';
+            // document.getElementById('sub').value = '';
+            // document.getElementById('message').value = '';
+            // document.getElementById('fileUpload').value = '';
+        };
+            }
+        
+   
+        function resetForm() {
+            document.getElementById('name').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('subject').value = '';
+            document.getElementById('message').value = '';
+            document.getElementById('fileUpload').value = '';
+        }
+        function insertText(text) {
+            var textarea = document.getElementById('message');
+            var currentMessage = textarea.value;
+
+            if (currentMessage === '') {
+                textarea.value = text;
+            } else {
+                textarea.value = currentMessage + '\n' + text;
+            }
+        }
+        var fileUploadInput = document.getElementById('fileUpload');
+        fileUploadInput.addEventListener('change', function (event) {
+            var file = event.target.files[0];
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var fileContent = e.target.result;
+                insertAttachment(file.name, fileContent);
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+
+        function insertAttachment(filename, content) {
+            var attachment = new Blob([content], { type: 'application/octet-stream' });
+
+            var formData = new FormData();
+            formData.append('fileUpload', attachment, filename);
+
+            fetch('/sendemail', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data); // Log the response from the server
+            })
+            .catch(error => {
+                console.error('Error sending file:', error);
+            });
+        
+        }
+        function insertElement(element) {
+        var messageBox = document.getElementById('message');
+        messageBox.focus();
+
+        var startPos = messageBox.selectionStart;
+        var endPos = messageBox.selectionEnd;
+        var scrollTop = messageBox.scrollTop;
+
+        messageBox.value = messageBox.value.substring(0, startPos) +
+            element.textContent +
+            messageBox.value.substring(endPos, messageBox.value.length);
+
+        messageBox.selectionStart = startPos + element.textContent.length;
+        messageBox.selectionEnd = startPos + element.textContent.length;
+        messageBox.scrollTop = scrollTop;
+
+        messageBox.focus();
+    }
+    
+    </script>
+</body>
+
+</html>
